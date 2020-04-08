@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import axios from 'axios'
 const Context =React.createContext()
 const reducer = (prevstate,action)=>{
     console.log(action.type)
@@ -6,13 +7,17 @@ const reducer = (prevstate,action)=>{
     switch(action.type){
         
         case "TOGGLE":
-            return { todos:prevstate.todos.map(t=>{if(t.id===action.payload){
-                console.log(t.complete,t.id,action.payload)
+            return { todos:prevstate.todos.map(t=>{if(t._id===action.payload){
+                
                 t.complete=!t.complete
-                console.log(t.complete) 
+                
             };return t}) 
         
         }
+        case "REMOVE":
+            return{todos:prevstate.todos.filter(todo=> todo._id !==action.payload)}
+        case "ADD":
+            return{todos:[...prevstate.todos,action.payload]}
         default:
             
             return prevstate   
@@ -20,13 +25,13 @@ const reducer = (prevstate,action)=>{
 }
 export  class Provider extends Component {
     state={
-        todos:[{id:1,title:"check-emails",complete:false},
-        {id:2,title:"check-voicemails",complete:false},
-        {id:3,title:"check-reports",complete:false},
-
-    ]
+        todos:[]
     ,
     dispatch:(action)=>this.setState(prevstate=>reducer(prevstate,action))
+    }
+
+    componentDidMount(){
+        axios.get("/todos").then(res=>this.setState({todos:res.data}))
     }
     render() {
         return (
